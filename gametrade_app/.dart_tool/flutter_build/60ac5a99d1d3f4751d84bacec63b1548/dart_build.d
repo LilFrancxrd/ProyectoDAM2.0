@@ -1,0 +1,1 @@
+ C:\\Users\\franc\\Desktop\\PROYECTO_MOVILES_DEFINITIVO\\FLUTTER\\gametrade_app\\.dart_tool\\flutter_build\\60ac5a99d1d3f4751d84bacec63b1548\\dart_build_result.json: 

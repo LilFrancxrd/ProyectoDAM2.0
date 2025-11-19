@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "225132114901",
+    "project_id": "videogame-trade",
+    "storage_bucket": "videogame-trade.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225132114901:android:94de8285462bd70514835c",
+        "android_client_info": {
+          "package_name": "com.example.videotrade_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAB_wXUJP0x3kdW1kTXv2xZwPNPlE4XTkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
