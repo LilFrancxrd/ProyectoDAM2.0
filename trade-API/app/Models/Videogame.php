@@ -12,6 +12,11 @@ class Videogame extends Model
         'description',
         'price'
     ];
+
+    public function getTitleAttribute()
+    {
+        return $this->name;
+    }
     //relationships
     public function images(){
         return $this->hasMany(VideogameImage::class);

@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\OfferController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\LibraryController;
 use App\Http\Controllers\Api\SalesController;
-use App\Http\Controllers\Api\SaleItemsController;
 use App\Http\Controllers\Api\TradesController;
 
 // RUTAS PÚBLICAS 
@@ -16,7 +15,7 @@ Route::get('/videogames', [VideogameController::class, 'index']);
 Route::get('/genres', [GenreController::class, 'index']);
 Route::get('/offers', [OfferController::class, 'index']);
 
-// RUTA DE PRUEBA FIREBASE 
+// RUTA DE PRUEBA FIREBASE (usando clase completa)
 Route::get('/test-firebase-auth', function (Request $request) {
     $firebaseUid = $request->attributes->get('firebase_uid');
     return response()->json([
@@ -24,12 +23,12 @@ Route::get('/test-firebase-auth', function (Request $request) {
         'firebase_uid' => $firebaseUid,
         'message' => '✅ Firebase auth funciona correctamente!'
     ]);
-})->middleware('auth.firebase');
+})->middleware(\App\Http\Middleware\FirebaseAuth::class); // 👈 Cambiado
 
-// RUTAS PROTEGIDAS (requieren Firebase) 
-Route::middleware('auth.firebase')->group(function () {
+// RUTAS PROTEGIDAS (usando clase completa)
+Route::middleware(\App\Http\Middleware\FirebaseAuth::class)->group(function () { // 👈 Cambiado
     
-    // users (excepto crear usuario, si usas Firebase para registro)
+    // users
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);
@@ -46,11 +45,8 @@ Route::middleware('auth.firebase')->group(function () {
     // trades
     Route::post('/trades', [TradesController::class, 'trade']);
     Route::get('/trades/history', [TradesController::class, 'history']);
-    
-    // sale_items
-    Route::apiResource('sale-items', SaleItemsController::class);
 });
 
-//  RUTAS DE REGISTRO/LOGIN FIREBASE 
+// RUTAS DE REGISTRO/LOGIN FIREBASE 
 Route::post('/users/sync-firebase', [UserController::class, 'syncFirebaseUser']);
-Route::post('/users', [UserController::class, 'store']); 
+Route::post('/users', [UserController::class, 'store']);

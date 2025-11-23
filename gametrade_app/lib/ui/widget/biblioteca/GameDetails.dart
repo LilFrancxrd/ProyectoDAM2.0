@@ -1,68 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:videotrade_app/ui/widget/buttons.dart';
 import 'package:videotrade_app/ui/widget/biblioteca/imageCard.dart';
 import 'package:videotrade_app/ui/widget/perfil/stat_card.dart';
-// Importa tu provider de videojuegos
+import 'package:videotrade_app/models/videogame.dart';
 
 class GameDetails extends StatefulWidget {
-  final String gameId; // ID del juego que viene de la API
+  final Videogame game;
   
-  const GameDetails({super.key, required this.gameId});
+  const GameDetails({super.key, required this.game});
   
   @override
   State<GameDetails> createState() => _GameDetailsState();
 }
 
 class _GameDetailsState extends State<GameDetails> {
-  bool isLoading = true;
-  Map<String, dynamic>? gameData;
+  bool isLoading = false;
+  String getFullImageUrl(String relativeUrl) {
+    if (relativeUrl.isEmpty) return '';
+    
+    // Si ya es una URL completa, devolverla tal cual
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    
+    // Si empieza con /, quitar el / inicial para evitar doble //
+    if (relativeUrl.startsWith('/')) {
+      relativeUrl = relativeUrl.substring(1);
+    }
+    
+    // Construir URL completa con tu base URL
+    return 'http://10.0.2.2:8000/$relativeUrl';
+  }
 
-  
   @override
   void initState() {
     super.initState();
-    _loadGameData();
+    print('Cargando detalles de: ${widget.game.nombre}');
   }
-  
-  // Cargar datos del juego desde la API
-  Future<void> _loadGameData() async {
-    try {
-      // TODO: Reemplaza esto con tu servicio real
-      // final data = await context.read<VideoJuegosProvider>().getGameById(widget.gameId);
-      
 
-      setState(() {
-        gameData = {
-          'title': 'Grand Theft Auto V',
-          'imageUrl': 'https://media.rockstargames.com/rockstargames/img/global/news/upload/13_gtavpc_03272015.jpg',
-          'genre': 'Acción • Mundo Abierto',
-          'intercambios': 0,
-          'intercambiosMaximos': 5,
-        };
-      });
-    } catch (e) {
-      setState(() => isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar el juego: $e')),
-        );
-      }
-    }
-  }
-  
-
-  
   @override
   Widget build(BuildContext context) {
-
-    if(gameData == null){
-      return Scaffold(
-        backgroundColor: Colors.blueGrey.shade900,
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }    
-    print('ENTROOOO BIBLIOTECA DETALLE');
+    final game = widget.game;
+    
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade900,
       appBar: AppBar(
@@ -75,30 +54,71 @@ class _GameDetailsState extends State<GameDetails> {
       ),
       body: Column(
         children: [
-          
-          //IMAGEN
+          // IMAGEN
           SizedBox(
             height: 500,
-            child: ImageCard(),
-          ),  
+            child: ImageCard(
+              imageUrl: game.images.isNotEmpty ? getFullImageUrl(game.images.first) : '', 
+              gameName: game.nombre,
+            ),
+          ),
+         
+              
           
-          // ESTADISTICAS
+              
+  
+          
+          // INFORMACIÓN DEL JUEGO
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Text(
+                //   game.nombre,
+                //   style: TextStyle(
+                //     color: Colors.white,
+                //     fontSize: 24,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
+                // SizedBox(height: 8),
+                // Text(
+                //   game.genre, // ✅ Usar game.genre directamente
+                //   style: TextStyle(
+                //     color: Colors.grey.shade300,
+                //     fontSize: 16,
+                //   ),
+                // ),
+                // SizedBox(height: 8),
+                // if (game.descripcion.isNotEmpty) // ✅ Usar descripcion (con c)
+                //   Text(
+                //     game.descripcion, // ✅ Usar descripcion (con c)
+                //     style: TextStyle(
+                //       color: Colors.grey.shade400,
+                //       fontSize: 14,
+                //     ),
+                //     maxLines: 3,
+                //     overflow: TextOverflow.ellipsis,
+                //   ),
+              ],
+            ),
+          ),
 
+          // ESTADÍSTICAS (si no tienes estos datos, puedes omitirlos o usar placeholders)
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              StatCard(value: '45h', label: 'Horas Juagdas'),
+              StatCard(value: '0h', label: 'Horas Jugadas'), // Placeholder
               SizedBox(width: 10),
-              StatCard(value: '85%', label: 'Completado'),
+              StatCard(value: '0%', label: 'Completado'), // Placeholder
               SizedBox(width: 10),
-              StatCard(value: '20', label: 'Total Logros'),
+              StatCard(value: '0', label: 'Total Logros'), // Placeholder
             ],
           ),
 
-
           // BOTONES 
-
           Expanded(
             flex: 2,
             child: Padding(
@@ -106,8 +126,7 @@ class _GameDetailsState extends State<GameDetails> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-
-                  //BOTON JUGAR
+                  // BOTON JUGAR
                   Boton(
                     label: 'Jugar Ahora', 
                     fontColor: Colors.white,
@@ -116,7 +135,7 @@ class _GameDetailsState extends State<GameDetails> {
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Iniciando GTA V'),
+                          content: Text('Iniciando ${game.nombre}'),
                           backgroundColor: Colors.white,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
@@ -128,24 +147,25 @@ class _GameDetailsState extends State<GameDetails> {
                   ),
                   SizedBox(height: 10),
 
-                  //BOTON DESINSTALAR
+                  // BOTON DESINSTALAR
                   Boton(
-                    label: 'Desinstalar' , 
-                    // color: Colors.red, 
-                    gradient: LinearGradient(colors: [const Color.fromARGB(251, 244, 13, 13) , const Color.fromARGB(255, 190, 15, 2)]),
+                    label: 'Desinstalar', 
+                    gradient: LinearGradient(colors: [
+                      const Color.fromARGB(251, 244, 13, 13),
+                      const Color.fromARGB(255, 190, 15, 2)
+                    ]),
                     fontColor: Colors.white,
                     icono: Icon(Icons.delete),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Desinstalando..'),
+                          content: Text('Desinstalando ${game.nombre}...'),
                           backgroundColor: Colors.white,
                           behavior: SnackBarBehavior.floating,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadiusGeometry.circular(12)
+                            borderRadius: BorderRadius.circular(12)
                           ),
                         ),
-                          
                       );
                     },
                   ),

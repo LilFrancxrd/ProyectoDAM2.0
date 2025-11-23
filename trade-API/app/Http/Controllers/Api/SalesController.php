@@ -17,8 +17,8 @@ class SalesController extends Controller
     public function checkout(Request $request)
     {
         try {
-            $firebaseUid = $request->attributes->get('firebase_uid');
-            $user = User::where('firebase_uid', $firebaseUid)->first();
+            
+            $user = $request->user();
             
             if (!$user) {
                 return response()->json([
@@ -41,8 +41,8 @@ class SalesController extends Controller
                 // 1. Crear venta
                 $sale = Sale::create([
                     'buyer' => $user->id,
-                    'total_price' => $totalPrice,
-                    'created_at' => now()
+                    'totalprice' => $totalPrice,
+                    
                 ]);
                 
                 // 2. Crear items de venta y agregar a biblioteca
@@ -52,7 +52,7 @@ class SalesController extends Controller
                         'sale_id' => $sale->id,
                         'videogame_id' => $item['videogame_id'],
                         'nIntercambios' => 0,  // Empieza en 0
-                        'total_price' => $item['price'],
+                        'totalprice' => $item['price'],
                         'status' => 'active'
                     ]);
                     
@@ -71,7 +71,7 @@ class SalesController extends Controller
                     'success' => true,
                     'data' => [
                         'sale_id' => $sale->id,
-                        'total_price' => $totalPrice,
+                        'totalprice' => $totalPrice,
                         'items_count' => count($validated['items'])
                     ],
                     'message' => 'Compra realizada exitosamente'

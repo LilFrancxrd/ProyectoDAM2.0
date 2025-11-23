@@ -1,11 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:videotrade_app/models/cart.dart';
 import 'package:videotrade_app/providers/cart_provider.dart';
 
 class CarritoPage extends StatelessWidget {
   const CarritoPage({super.key});
   
+
+  Future<void> _realizarCompra(BuildContext context, CartProvider cart) async {
+    try {
+      // 1. Obtener usuario y token de Firebase
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuario no autenticado')),
+        );
+        return;
+      }
+      
+      String? token = await user.getIdToken();
+
+
+
+      var itemsParaAPI = cart.items.values.map((item) => {
+        "videogame_id": item.id,  
+        "price": item.precio
+      }).toList();
+
+
+
+      // Llamar a la API Laravel
+      var response = await http.post(
+        Uri.parse('http://10.0.2.2:8000/api/sales/checkout'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'items': itemsParaAPI,
+        }),
+      );
+
+ 
+
+      if (response.statusCode == 201) {
+        var data = jsonDecode(response.body);
+        
+        // Mostrar mensaje de éxito
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${data['message']}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        // Limpiar el carrito
+        cart.clear();
+        
+        // Opcional: Navegar a la biblioteca
+        // Navigator.pushNamed(context, '/library');
+        
+      } else {
+        // Manejar error
+        var errorData = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${errorData['message'] ?? 'Error en la compra'}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+
+    } catch (e) {
+ 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     print('ENTRAAAAAA');
@@ -26,15 +105,10 @@ class CarritoPage extends StatelessWidget {
             )
           : ListView(
               children: cart.items.values.map((item) {
-                print('Item: ${item.nombre}');
-                print('Image URL: "${item.imageUrl}"');
-                print('URL vacía: ${item.imageUrl.isEmpty}');
-                print('URL es null: ${item.imageUrl == 'null'}');
-                  // Suponemos que tu CartItem ahora tiene un campo imageUrl
-                // Si no lo tiene, podrías agregarlo al hacer addItem
+                
                 final imageUrl = item.imageUrl.isNotEmpty 
                         ? item.imageUrl
-                        : 'https://via.placeholder.com/60x60/2d3748/ffffff?text=Sin+Img'; // fallback
+                        : 'https://via.placeholder.com/60x60/2d3748/ffffff?text=Sin+Img';
 
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -44,7 +118,6 @@ class CarritoPage extends StatelessWidget {
                   elevation: 3,
                   child: ListTile(
                     leading: ClipRRect(
-                      
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
                         imageUrl,
@@ -101,12 +174,8 @@ class CarritoPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Compra realizada'),
-                    ),
-                  );
-                  cart.clear();
+      
+                  _realizarCompra(context, cart);
                 },
                 child: Text(
                   'Comprar todo (${cart.itemCount} artículos - \$${cart.precioTotal % 1 == 0 ? cart.precioTotal.toInt() : cart.precioTotal.toStringAsFixed(2)})',

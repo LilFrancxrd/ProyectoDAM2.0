@@ -8,7 +8,6 @@ import 'package:videotrade_app/ui/widget/tienda/game_card.dart';
 import 'package:videotrade_app/models/cart.dart';
 import 'package:flutter/material.dart';
 
-
 import 'package:videotrade_app/ui/widget/tienda/generos_card.dart';
 import 'package:videotrade_app/ui/widget/tienda/ofertas_card.dart';
 
@@ -60,27 +59,36 @@ class _TiendaTabState extends State<TiendaTab> {
                 ),
               ],
             ),
-            body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            body: ListView( // ✅ CAMBIO PRINCIPAL: ListView único
               children: [
-                Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Row(
-                    children: [
-                      Icon(Icons.arrow_right_alt, color: Colors.white),
-                      Text(
-                        '  Generos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17
-                        ),
+                // Sección Géneros
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Row(
+                        children: [
+                          Icon(Icons.arrow_right_alt, color: Colors.white),
+                          Text(
+                            '  Generos',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    GenerosCard(),
+                  ],
                 ),
-                GenerosCard(),
 
-                Padding(
+                // Sección Ofertas
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
                       padding: EdgeInsets.all(5),
                       child: Row(
                         children: [
@@ -148,38 +156,46 @@ class _TiendaTabState extends State<TiendaTab> {
                         );
                       },
                     ),
-                Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: Row(
-                    children: [
-                      Text(
-                        '  Juegos Populares', 
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17
-                        ),
-                      ),
-                      Icon(Icons.arrow_right_alt_outlined, color: Colors.white)
-                    ],
-                  ),
+                  ],
                 ),
 
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: videojuegos.length,
-                    itemBuilder: (context, index){
-                      final juego = videojuegos[index];
-                      return GameCard(
-                        id: juego.id,
-                        title: juego.nombre, 
-                        imageUrl: juego.images.isNotEmpty 
-                          ? juego.images.first
-                          : 'https://via.placeholder.com/400x225?text=No+Image', 
-                        price: juego.precio,
-                      );
-                    },
-                  ),
+                // Sección Juegos Populares
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Row(
+                        children: [
+                          Text(
+                            '  Juegos Populares', 
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17
+                            ),
+                          ),
+                          Icon(Icons.arrow_right_alt_outlined, color: Colors.white)
+                        ],
+                      ),
+                    ),
+
+                    // ✅ LISTA DE JUEGOS POPULARES - SIN SCROLL PROPIO
+                    Column(
+                      children: videojuegos.map((juego) {
+                        return GameCard(
+                          id: juego.id,
+                          title: juego.nombre, 
+                          imageUrl: juego.images.isNotEmpty 
+                            ? juego.images.first
+                            : 'https://via.placeholder.com/400x225?text=No+Image', 
+                          price: juego.precio,
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
+
+                SizedBox(height: 80), // Espacio para el FAB
               ],
             ),
             floatingActionButton: FloatingActionButton.extended(

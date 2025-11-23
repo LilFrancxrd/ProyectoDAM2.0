@@ -30,14 +30,14 @@ class VideojuegosProvider {
   
           throw Exception('Formato de respuesta desconocido');
         }   
-        print('[DEBUG] Juegos a mapear: ${datos.length}');        
+          
         if (datos.isNotEmpty) {
         }
         
         return datos.map((json) => Videogame.fromJson(json)).toList();
         
       } catch (e) {
-        print('[DEBUG] Error parsing JSON: $e');
+     
         rethrow;
       }
     } else {

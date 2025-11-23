@@ -22,8 +22,8 @@ class TradesController extends Controller
     public function trade(Request $request)
     {
         try {
-            $firebaseUid = $request->attributes->get('firebase_uid');
-            $user = User::where('firebase_uid', $firebaseUid)->first();
+            
+            $user = $request->user();
             
             $validated = $request->validate([
                 'unique_game_id' => 'required|integer|exists:sale_items,id',
